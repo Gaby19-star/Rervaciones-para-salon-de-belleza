@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plantilla de Reserva</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="phone">
+  <div class="screen">
+
+    <div class="step active" id="step-1">
+      <div class="hero">
+        <div class="avatar" id="cfg-emoji">💈</div>
+        <div class="eyebrow" id="cfg-category">CATEGORÍA</div>
+        <h1 class="name" id="cfg-name">Nombre del negocio</h1>
+        <div class="contact-row">
+          <div class="contact-pill">📞 <span id="cfg-phone">0000-0000000</span></div>
+          <div class="contact-pill">💬 WhatsApp</div>
+        </div>
+      </div>
+      <div class="body-scroll">
+        <div class="section-label">ELIGE UN SERVICIO</div>
+        <div id="service-list"></div>
+      </div>
+      <div class="footer">
+        <button class="btn btn-primary" id="btn-to-extras" disabled>Continuar</button>
+      </div>
+    </div>
+
+    <div class="step" id="step-extras">
+      <div class="topbar">
+        <button class="back show" data-back="1">←</button>
+        <span class="brand-mini">Cotización</span>
+      </div>
+      <div class="progress"><div style="width:25%"></div></div>
+      <div class="body-scroll">
+        <h2 class="q-title">Agrega un extra</h2>
+        <p class="q-sub">Opcional — esto se suma al precio del servicio.</p>
+        <div id="extra-list"></div>
+        <div class="quote-bar">
+          <span class="label">Total estimado</span>
+          <span class="amount" id="quote-amount">$0.00</span>
+        </div>
+      </div>
+      <div class="footer">
+        <button class="btn btn-primary" id="btn-to-step2">Continuar</button>
+      </div>
+    </div>
+
+  
+    <div class="step" id="step-2">
+      <div class="topbar">
+        <button class="back show" data-back="extras">←</button>
+        <span class="brand-mini" id="cfg-name-2"></span>
+      </div>
+      <div class="progress"><div style="width:50%"></div></div>
+      <div class="body-scroll">
+        <h2 class="q-title">¿Cuándo te viene bien?</h2>
+        <p class="q-sub">Solo mostramos horarios disponibles.</p>
+        <div class="section-label">FECHA · <span id="month-year">—</span></div>
+        <div class="day-row" id="day-row"></div>
+        <div class="section-label">HORARIO</div>
+        <div class="slot-grid" id="slot-grid"></div>
+        <div class="empty-note" id="empty-note" style="display:none;">
+          No hay horarios disponibles este día. Prueba con otra fecha.
+        </div>
+      </div>
+      <div class="footer">
+        <button class="btn btn-primary" id="btn-to-step3" disabled>Continuar</button>
+      </div>
+    </div>
+
+
+    <div class="step" id="step-3">
+      <div class="topbar">
+        <button class="back show" data-back="2">←</button>
+        <span class="brand-mini">Tus datos</span>
+      </div>
+      <div class="progress"><div style="width:85%"></div></div>
+      <div class="body-scroll">
+        <div class="field-label">Nombre completo <span class="req">*</span></div>
+        <input class="field" id="f-name" placeholder="Tu nombre y apellido">
+
+        <div class="field-label">WhatsApp <span class="req">*</span></div>
+        <input class="field" id="f-phone" placeholder="+00 000 0000000">
+
+        <div class="field-label">Nota (opcional)</div>
+        <input class="field" id="f-note" placeholder="Algo que debamos saber">
+
+        <div class="section-label">MÉTODO DE PAGO</div>
+        <div class="pay-methods" id="pay-methods"></div>
+        <div class="pay-info" id="pay-info" style="display:none;"></div>
+
+        <div class="summary" id="summary"></div>
+      </div>
+      <div class="footer">
+        <button class="btn btn-primary" id="btn-confirm" disabled>Confirmar reserva</button>
+      </div>
+    </div>
+
+
+    <div class="step" id="step-4">
+      <div class="confirm">
+        <div class="check">✓</div>
+        <h2>¡Reserva confirmada!</h2>
+        <p id="confirm-detail">Te esperamos.</p>
+      </div>
+      <div class="footer">
+        <button class="btn btn-secondary" id="btn-restart">Hacer otra reserva</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
