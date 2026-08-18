@@ -1,0 +1,164 @@
+# Sistema de Reservas para Salón de Belleza
+
+  Es Sistema completo de reservas online: el cliente elige un servicio, agrega extras,
+escoge fecha y hora disponible, pagos y el
+negocio recibe un mensaje de WhatsApp con todo el detalle. Pensado para
+salones de belleza, pero sirve para cualquier negocio que reserve citas por hora
+(barbería, spa, consultorio, estudio de tatuajes, etc.).
+
+## ¿Qué hace exactamente?
+
+1. El cliente entra a la página y ve el perfil del negocio y su lista de servicios.
+2. Elige un servicio → puede agregar extras opcionales (cada uno suma al precio).
+3. Elige un día (siempre a partir de HOY, en tiempo real) y una hora disponible.
+  Las horas que ya tiene otro cliente aparecen marcadas como "Ocupado" y no se
+  pueden volver a elegir.
+4. Llena su nombre, WhatsApp y elige método de pago. Ve el total en dólares y
+  su equivalente en bolívares, calculado con la tasa del día.
+5. Al confirmar, la reserva se guarda en el servidor y se abre WhatsApp con un
+  mensaje ya escrito hacia el número del negocio, avisando la nueva reserva.
+
+
+## Estructura del proyecto
+Rervaciones para salon de belleza
+
+├── public/                 ← Frontend: lo que ve el cliente en el navegador
+│   ├── index.html            estructura de las 5 pantallas (servicios, extras,
+│   │                         fecha/hora, datos y pago, confirmación)
+│   ├── style.css              todos los estilos y colores
+│   └── script.js               la lógica del navegador: pide datos al backend,
+│                               dibuja las pantallas, valida el formulario
+│
+└── backend/                ← Servidor: lo que corre en la computadora/hosting
+    ├── config.js              *** los datos de TU negocio *** (edítalo a ti)
+    ├── store.js                guarda las reservas y la tasa del día
+    ├── server.js                define las rutas de la API (explicadas abajo)
+    ├── package.json
+    ├── README.md                notas técnicas rápidas del backend
+    └── data/                     aquí se crean solos bookings.json y
+                                  rate-cache.json la primera vez que corres el server
+```
+
+**Regla simple:** el frontend (`public/`) no tiene ningún dato del negocio
+escrito adentro — todo lo pide al backend cuando carga la página. Así que para
+cambiar de negocio, servicios, precios, horarios o datos de pago, **solo
+edites `backend/config.js`** y ya se refleja en toda la página.
+
+## Cómo correrlo en tu computadora
+
+Necesitas tener [Node.js](https://nodejs.org) instalado (versión 18 o más
+reciente). Para saber si ya lo tienes:
+
+```bash
+node -v
+```
+
+Luego:
+
+```bash
+cd backend
+npm install     # solo la primera vez, instala lo que necesita el servidor
+npm start       # enciende el servidor
+```
+
+Vas a ver en la terminal:
+
+```
+Servidor corriendo en http://localhost:3000
+```
+
+Abre esa dirección en tu navegador — ahí está la página funcionando completa
+(frontend y backend juntos, un solo servidor los sirve a los dos).
+
+Para apagarlo: `Ctrl + C` en la terminal donde corre.
+
+## Cómo personalizarlo para tu negocio
+
+Todo se edita en un solo archivo: **`backend/config.js`**. Ahí cambias:
+
+| Qué quieres cambiar          | Qué editar en config.js                          |
+|-------------------------------|---------------------------------------------------|
+| Nombre, categoría, emoji       | `name`, `category`, `emoji`                        |
+| WhatsApp del negocio            | `phone` (formato: código de país + número, sin `+` ni espacios) |
+| Servicios y precios              | el arreglo `services`                              |
+| Extras / add-ons                  | el arreglo `extras` (`maxQty: 1` = checkbox, más de 1 = permite cantidad) |
+| Horario de atención                 | `openHour`, `closeHour`, `slotMinutes`             |
+| Cuántos días se muestran para reservar | `daysToShow`                                    |
+| Métodos de pago y sus datos            | `paymentMethods` y `paymentInfo`                 |
+
+Después de editar `config.js`, solo reinicia el servidor (`Ctrl+C` y `npm
+start` de nuevo) para que tome los cambios.
+
+## La API del backend (por si quieres conectar otra cosa)
+
+| Método | Ruta                        | Para qué sirve                                            |
+|--------|-----------------------------|-------------------------------------------------------------|
+| GET    | `/api/config`                | Le da al frontend todos los datos del negocio               |
+| GET    | `/api/availability/:fecha`    | Qué horas de ese día ya están ocupadas (`fecha` = YYYY-MM-DD) |
+| GET    | `/api/exchange-rate`           | Tasa Bs./USD del día (se guarda en caché, una consulta externa por día) |
+| POST   | `/api/bookings`                 | Crea una reserva. Valida que la hora esté libre y calcula el total en el servidor (nunca confía en lo que mande el navegador) |
+| GET    | `/api/bookings`                  | Lista todas las reservas hechas (para que el dueño del negocio las revise) |
+
+## ¿Dónde se guardan los datos?
+En archivos de texto normal dentro de `backend/data/`:
+- `bookings.json` — cada reserva hecha, con fecha, hora, cliente, servicio,
+  extras, total y tasa usada.
+- `rate-cache.json` — la tasa del día, para no consultarla en cada visita.
+
+
+## Cosas a tener en cuenta antes de usarlo con clientes reales
+
+- **Para que el negocio y los clientes lo usen desde internet** (no solo en tu
+  computadora), hay que subir la carpeta `backend/` a un servicio de hosting
+  que corra Node.js (Render, Railway, un VPS, etc.) y que quede corriendo
+  todo el tiempo — no solo en `localhost`.
+- **`GET /api/bookings`** hoy no tiene contraseña — cualquiera que sepa la
+  dirección puede ver todas las reservas. Antes de publicarlo en internet,
+  conviene protegerlo con una clave o usuario/contraseña.
+- La tasa de cambio depende de una API pública externa
+  (`ve.dolarapi.com`). Si en algún momento deja de funcionar, el sistema usa
+  automáticamente el número de respaldo (`fallbackRate` en `config.js`), que
+  debes actualizar tú a mano de vez en cuando.
+- Los mensajes de WhatsApp se abren desde el navegador del cliente (no se
+  envían solos) — el cliente tiene que darle "Enviar" en WhatsApp para que
+  le llegue al negocio.
+
+
+  # Backend de reservas
+Backend simple con **Express + archivos JSON** (sin motor de base de datos que instalar).
+Sirve el frontend y expone la API que usa `public/script.js`.
+
+## Cómo correrlo
+
+```bash
+npm install
+npm start
+```
+
+Abre http://localhost:3000
+
+## Estructura
+
+- `config.js` — **todos** los datos del negocio (nombre, servicios, extras, horarios, pagos). Edita solo este archivo para adaptarlo a otro negocio.
+- `store.js` — guarda reservas y la tasa del día en `data/bookings.json` y `data/rate-cache.json` (se crean solos al arrancar).
+- `server.js` — la API:
+  - `GET /api/config` — datos del negocio para el frontend
+  - `GET /api/availability/:date` — horas ya ocupadas ese día (YYYY-MM-DD)
+  - `GET /api/exchange-rate` — tasa Bs./USD del día (cacheada, 1 consulta externa por día)
+  - `POST /api/bookings` — crea una reserva (valida que la hora esté libre y calcula el total en el servidor)
+  - `GET /api/bookings` — lista todas las reservas (para el dueño del negocio)
+- `public/` — el frontend (index.html, style.css, script.js). Ya no tiene datos quemados: los pide a la API al cargar.
+
+## Por qué esto resuelve lo de "horas ocupadas compartidas"
+Antes, cada reserva se guardaba solo en la memoria del navegador de quien reservaba — otro
+cliente que entrara no la veía. Ahora se guarda en `data/bookings.json` **en el servidor**,
+así que todos los que visiten la página ven las mismas horas bloqueadas.
+
+
+## Para producción
+- Migrar `data/bookings.json` a una base de datos real (SQLite/Postgres) si el negocio
+  crece — las rutas de la API no cambiarían, solo lo de dentro de `store.js`.
+- Poner el backend detrás de HTTPS y un dominio propio.
+- Agregar autenticación a `GET /api/bookings` (hoy cualquiera puede verla).
+- Poner el servidor a correr con un gestor de procesos (pm2, systemd, etc.) para que se
+  reinicie solo si se cae.
